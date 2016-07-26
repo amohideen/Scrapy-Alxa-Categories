@@ -1,0 +1,33 @@
+import scrapy
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
+ 
+from allnews.items import AllnewsItem
+ 
+ 
+class AlexaSpider(CrawlSpider):
+    name = 'alexa'
+    allowed_domains = ['alexa.com']
+    start_urls = ['http://www.alexa.com/topsites/category/Top/News']
+ 
+    rules = (
+        Rule(LinkExtractor(restrict_xpaths='//*[@class="alexa-pagination"]'),
+             callback='parse_item', follow=True),
+    )
+ 
+    def parse_item(self, response):
+        selector = response.xpath('//*[@id="alx-content"]/div/div/section[2]/span/span/section/ul/li')
+        for i in selector.extract():
+            yield {"url": i.replace('/siteinfo/', '')}
+	   # yield {"url": i}
+
+
+def parse_question(self, response):
+        yield {
+            'title': response.css('h1 a::text').extract_first(),
+            'votes': response.css('.question .vote-count-post::text').extract_first(),
+            'body': response.css('.question .post-text').extract_first(),
+            'tags': response.css('.question .post-tag::text').extract(),
+            'link': response.url,
+        }
+
